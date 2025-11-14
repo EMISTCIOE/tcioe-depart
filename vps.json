@@ -1,0 +1,9 @@
+{
+  "name": "tcioe-depart",
+  "type": "node",
+  "path": "/srv/apps/tcioe-depart",
+  "port": 3002,
+  "domain": "frontend-tcioe.edu.np",
+  "build": "pnpm install && pnpm build",
+  "start": "pnpm start"
+}
