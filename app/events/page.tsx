@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -10,8 +11,59 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Users, ExternalLink } from "lucide-react";
+import { getPublicApiUrl } from "@/lib/env";
 import { useDepartment, useDepartmentEvents } from "@/hooks/use-department";
 import { Skeleton } from "@/components/ui/skeleton";
+
+type GlobalEventItem = {
+  uuid: string;
+  title: string;
+  description?: string | null;
+  eventType?: string | null;
+  eventStartDate?: string | null;
+  eventEndDate?: string | null;
+};
+
+const formatEventDate = (value?: string | null) => {
+  if (!value) return "TBD";
+  try {
+    return new Date(value).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+    });
+  } catch {
+    return value;
+  }
+};
+
+const formatEventRange = (start?: string | null, end?: string | null) => {
+  if (!start && !end) return "Dates to be announced";
+  const from = formatEventDate(start);
+  if (!end) return from;
+  const to = formatEventDate(end);
+  return from === to ? from : `${from} — ${to}`;
+};
+
+const sanitizeText = (value?: string | null) =>
+  value
+    ? value.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()
+    : "";
+
+const truncateText = (value?: string | null, limit = 120) => {
+  const text = sanitizeText(value);
+  if (!text) return "";
+  if (text.length <= limit) return text;
+  return `${text.slice(0, limit - 1)}…`;
+};
+
+const humanizeEventType = (value?: string | null) =>
+  value
+    ? value
+        .split(/[_\s]+/)
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+        .join(" ")
+    : "";
 
 export default function EventsPage() {
   const { data: dept } = useDepartment();
@@ -46,6 +98,59 @@ export default function EventsPage() {
       return d;
     }
   };
+
+  const [globalEvents, setGlobalEvents] = useState<GlobalEventItem[]>([]);
+  const [globalLoading, setGlobalLoading] = useState(false);
+  const [globalError, setGlobalError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!dept?.uuid) {
+      setGlobalEvents([]);
+      setGlobalLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const fetchGlobalEvents = async () => {
+      setGlobalLoading(true);
+      setGlobalError(null);
+      try {
+        const params = new URLSearchParams({
+          limit: "4",
+          department: dept.uuid,
+          ordering: "-eventStartDate",
+        });
+        const response = await fetch(
+          `${getPublicApiUrl("/api/v1/public/website-mod/global-events")}?${params.toString()}`,
+          {
+            headers: { Accept: "application/json" },
+            signal: controller.signal,
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`Failed to load campus events (${response.status})`);
+        }
+        const data = await response.json();
+        const items = Array.isArray(data?.results) ? data.results : [];
+        setGlobalEvents(items);
+      } catch (error) {
+        if ((error as Error).name === "AbortError") return;
+        setGlobalError(
+          error instanceof Error
+            ? error.message
+            : "Unable to load campus events right now."
+        );
+      } finally {
+        setGlobalLoading(false);
+      }
+    };
+
+    void fetchGlobalEvents();
+
+    return () => {
+      controller.abort();
+    };
+  }, [dept?.uuid]);
 
   return (
     <div className="py-12">
@@ -139,6 +244,79 @@ export default function EventsPage() {
               ))}
             </div>
           )}
+        </div>
+
+        <div className="space-y-8 border-t border-border/70 pt-12">
+          <div className="text-center space-y-2">
+            <p className="text-xs uppercase tracking-[0.4em] text-primary font-semibold">
+              Campus highlights
+            </p>
+            <h2 className="text-3xl font-bold text-gray-900">
+              Global events tied to {dept?.shortName || "your department"}
+            </h2>
+            <p className="text-muted-foreground">
+              Events that bring the whole campus together — filtered for your
+              department so you know what’s nearby.
+            </p>
+          </div>
+
+          {globalLoading ? (
+            <div className="grid gap-6 md:grid-cols-2">
+              {[...Array(2)].map((_, index) => (
+                <div
+                  key={index}
+                  className="h-44 animate-pulse rounded-2xl bg-muted"
+                />
+              ))}
+            </div>
+          ) : globalError ? (
+            <p className="text-sm text-red-600 text-center">{globalError}</p>
+          ) : globalEvents.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center">
+              No campus-wide events are linked to this department right now.
+            </p>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2">
+              {globalEvents.map((event) => (
+                <div
+                  key={event.uuid}
+                  className="space-y-3 rounded-2xl border border-border/70 bg-white p-5 shadow-sm shadow-border/30"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <h3 className="text-lg font-semibold">{event.title}</h3>
+                    {event.eventType && (
+                      <Badge variant="outline">
+                        {humanizeEventType(event.eventType)}
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {formatEventRange(event.eventStartDate, event.eventEndDate)}
+                  </p>
+                  <p className="text-sm text-muted-foreground line-clamp-3">
+                    {truncateText(event.description, 100)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="text-center">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full max-w-xs"
+              asChild
+            >
+              <a
+                href="https://tcioe.edu.np/events"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Browse campus-wide events
+              </a>
+            </Button>
+          </div>
         </div>
       </div>
     </div>

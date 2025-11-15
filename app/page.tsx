@@ -4,20 +4,24 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  BookOpen,
-  Users,
+  Atom,
   Award,
-  Calendar,
   Bell,
-  Download,
+  BookOpen,
+  Calendar,
   Clock,
+  Download,
+  Layers,
+  Sparkles,
+  Users,
 } from "lucide-react";
-import { DEPARTMENT_CODE } from "@/lib/env";
+import { DEPARTMENT_CODE, getPublicApiUrl } from "@/lib/env";
 import { departmentSlugFromCode } from "@/lib/department";
 import {
   getDepartment,
@@ -38,11 +42,55 @@ function eventStatus(start: string, end: string) {
   return { label: "Running", variant: "default" as const };
 }
 
+function formatShortDate(value?: string) {
+  if (!value) return "";
+  try {
+    return new Date(value).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+    });
+  } catch {
+    return value;
+  }
+}
+
+function humanizeLabel(value?: string) {
+  if (!value) return "";
+  return value
+    .split(/[_\s]+/)
+    .map(
+      (part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+    )
+    .join(" ");
+}
+
 export default async function HomePage() {
   const slug = departmentSlugFromCode(DEPARTMENT_CODE);
 
+  const fetchPublicList = async (
+    path: string,
+    params: Record<string, string>
+  ) => {
+    const query = new URLSearchParams(params).toString();
+    const url = `${getPublicApiUrl(path)}${query ? `?${query}` : ""}`;
+    const response = await fetch(url, {
+      headers: { Accept: "application/json" },
+      next: { revalidate: 120 },
+    });
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch ${path} (${response.status} ${response.statusText})`
+      );
+    }
+    return response.json();
+  };
+
   // Handle potential API failures during build gracefully
   let dept, eventsRes, staffsRes, noticesRes;
+  let researchPayload: any;
+  let projectPayload: any;
+  let journalPayload: any;
 
   try {
     dept = slug ? await getDepartment(slug) : undefined;
@@ -77,12 +125,60 @@ export default async function HomePage() {
     noticesRes = undefined;
   }
 
+  try {
+    researchPayload =
+      slug && slug.length > 0
+        ? await fetchPublicList("/api/v1/public/research-mod/research", {
+            department_slug: slug,
+            limit: "3",
+            ordering: "-date_published",
+          })
+        : undefined;
+  } catch (error) {
+    console.warn("Failed to fetch research highlights:", error);
+    researchPayload = undefined;
+  }
+
+  try {
+    projectPayload =
+      slug && slug.length > 0
+        ? await fetchPublicList("/api/v1/public/project-mod/projects", {
+            department_slug: slug,
+            limit: "3",
+            ordering: "-created_at",
+          })
+        : undefined;
+  } catch (error) {
+    console.warn("Failed to fetch project highlights:", error);
+    projectPayload = undefined;
+  }
+
+  try {
+    journalPayload =
+      slug && slug.length > 0
+        ? await fetchPublicList("/api/v1/public/journal-mod/articles", {
+            department_slug: slug,
+            limit: "2",
+            ordering: "-date_published",
+          })
+        : undefined;
+  } catch (error) {
+    console.warn("Failed to fetch journal highlights:", error);
+    journalPayload = undefined;
+  }
+
   const events = eventsRes?.results || [];
   const notices = noticesRes?.results || [];
   const featuredNotice = notices.find((n) => n.isFeatured && n.thumbnail);
   const hod = (staffsRes?.results || []).sort(
     (a, b) => a.displayOrder - b.displayOrder
   )[0];
+  const researchHighlights = researchPayload?.results ?? [];
+  const projectHighlights = projectPayload?.results ?? [];
+  const journalHighlights = journalPayload?.results ?? [];
+  const researchSpotlight = researchHighlights[0];
+  const projectSpotlight = projectHighlights[0];
+  const journalSpotlight = journalHighlights[0];
   return (
     <div className="relative bg-background">
       {/* Hero Section */}
@@ -370,6 +466,187 @@ export default async function HomePage() {
                   <Link href="/research">Explore Research</Link>
                 </Button>
               </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 bg-gradient-to-br from-slate-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          <div className="text-center space-y-3">
+            <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground font-semibold">
+              Research & Innovation
+            </p>
+            <h2 className="text-3xl font-bold text-gray-900">
+              Featured research, projects, and journal pieces
+            </h2>
+            <p className="text-gray-600">
+              Fresh scholarship and student projects anchored to the department, all in one place.
+            </p>
+          </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            <Card className="border border-border/50 bg-white shadow-md">
+              <CardHeader className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                    <Atom className="h-5 w-5 text-primary" />
+                    Research
+                  </div>
+                  {researchSpotlight?.status && (
+                    <Badge variant="outline">
+                      {humanizeLabel(researchSpotlight.status)}
+                    </Badge>
+                  )}
+                </div>
+                <CardTitle className="text-xl font-semibold leading-snug">
+                  {researchSpotlight?.title || "Research updates will appear shortly"}
+                </CardTitle>
+                <CardDescription className="text-sm text-muted-foreground line-clamp-3">
+                  {researchSpotlight
+                    ? researchSpotlight.abstract
+                    : "Our faculty publish impactful research and we will highlight one of them here."}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {researchSpotlight ? (
+                  <>
+                    <p className="text-sm text-muted-foreground">
+                      {researchSpotlight.department?.name || "Department research"} ·{" "}
+                      {researchSpotlight.fundingAgency || "Sponsored initiative"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {formatShortDate(researchSpotlight.startDate)} –{" "}
+                      {researchSpotlight.endDate
+                        ? formatShortDate(researchSpotlight.endDate)
+                        : "Ongoing"}
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    We showcase a flagship research article as soon as it is ready.
+                  </p>
+                )}
+              </CardContent>
+              <CardFooter className="pt-0">
+                <Button
+                  variant="outline"
+                  className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                  asChild
+                >
+                  <Link href="/research">Explore research</Link>
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <Card className="border border-border/50 bg-white shadow-md">
+              <CardHeader className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                    <Layers className="h-5 w-5 text-primary" />
+                    Projects
+                  </div>
+                  {projectSpotlight?.status && (
+                    <Badge variant="outline">
+                      {humanizeLabel(projectSpotlight.status)}
+                    </Badge>
+                  )}
+                </div>
+                <CardTitle className="text-xl font-semibold leading-snug">
+                  {projectSpotlight?.title || "Featured projects land here soon"}
+                </CardTitle>
+                <CardDescription className="text-sm text-muted-foreground line-clamp-3">
+                  {projectSpotlight?.abstract ||
+                    "Hands-on solutions and prototypes from our department teams."}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {projectSpotlight ? (
+                  <p className="text-sm text-muted-foreground">
+                    {projectSpotlight.department?.name || "Department project"} ·{" "}
+                    {projectSpotlight.academicYear || "Academic update"}
+                  </p>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Coming soon: a student or faculty showcase from the latest term.
+                  </p>
+                )}
+              </CardContent>
+              <CardFooter className="pt-0">
+                <Button
+                  variant="outline"
+                  className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                  asChild
+                >
+                  <Link href="/projects">View projects</Link>
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <Card className="border border-border/50 bg-white shadow-md">
+              <CardHeader className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    Journal
+                  </div>
+                  {journalSpotlight?.genre && (
+                    <Badge variant="outline">{journalSpotlight.genre}</Badge>
+                  )}
+                </div>
+                <CardTitle className="text-xl font-semibold leading-snug">
+                  {journalSpotlight?.title ||
+                    "Journal articles from the department will appear here"}
+                </CardTitle>
+                <CardDescription className="text-sm text-muted-foreground line-clamp-3">
+                  {journalSpotlight?.abstract ||
+                    "Stay tuned for published papers or conference articles that represent the department."}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {journalSpotlight ? (
+                  <>
+                    <p className="text-sm text-muted-foreground">
+                      {journalSpotlight.discipline || "Department journal"} ·{" "}
+                      {formatShortDate(journalSpotlight.datePublished)}
+                    </p>
+                    {journalSpotlight.doiId && (
+                      <p className="text-sm text-muted-foreground">
+                        DOI: {journalSpotlight.doiId}
+                      </p>
+                    )}
+                    {journalSpotlight.authors?.length ? (
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {journalSpotlight.authors
+                          .map((author) =>
+                            [author.givenName, author.familyName]
+                              .filter(Boolean)
+                              .join(" ")
+                          )
+                          .join(", ")}
+                      </p>
+                    ) : null}
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    We pull the latest journal article tied to your department.
+                  </p>
+                )}
+              </CardContent>
+              <CardFooter className="pt-0">
+                <Button
+                  variant="outline"
+                  className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                  asChild
+                >
+                  <a
+                    href="https://tcioe.edu.np/journal"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Visit journal
+                  </a>
+                </Button>
+              </CardFooter>
             </Card>
           </div>
         </div>

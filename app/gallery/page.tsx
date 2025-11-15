@@ -1,51 +1,129 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Construction, Wrench, HardHat } from "lucide-react";
+import { DEPARTMENT_CODE, getPublicApiUrl } from "@/lib/env";
+import { departmentSlugFromCode } from "@/lib/department";
+import { getDepartment } from "@/lib/data/publicDepartment";
 
-export default function GalleryPage() {
+type GalleryItem = {
+  uuid: string;
+  image: string;
+  caption?: string | null;
+  createdAt?: string | null;
+};
+
+const formatGalleryDate = (value?: string | null) => {
+  if (!value) return "";
+  try {
+    return new Date(value).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+    });
+  } catch {
+    return value;
+  }
+};
+
+export default async function GalleryPage() {
+  const slug = departmentSlugFromCode(DEPARTMENT_CODE);
+  let department;
+  try {
+    if (slug) {
+      department = await getDepartment(slug);
+    }
+  } catch (error) {
+    console.warn("Unable to load department for gallery:", error);
+  }
+
+  let galleryItems: GalleryItem[] = [];
+  let galleryError: string | null = null;
+
+  if (department?.uuid) {
+    try {
+      const params = new URLSearchParams({
+        limit: "12",
+        source_type: "department_gallery",
+        source_identifier: department.uuid,
+      });
+      const response = await fetch(
+        `${getPublicApiUrl("/api/v1/public/website-mod/global-gallery")}?${params.toString()}`,
+        {
+          headers: {
+            Accept: "application/json",
+          },
+          next: { revalidate: 120 },
+        }
+      );
+      if (!response.ok) {
+        galleryError = `Gallery service returned ${response.status}`;
+      } else {
+        const data = await response.json();
+        const results = Array.isArray(data?.results) ? data.results : [];
+        galleryItems = results.map((item: any) => ({
+          uuid: item.uuid,
+          image: item.image,
+          caption: item.caption,
+          createdAt: item.createdAt,
+        }));
+      }
+    } catch (error) {
+      galleryError = "Failed to load gallery images.";
+      console.error("Gallery fetch error:", error);
+    }
+  }
+
   return (
-    <div className="py-12 min-h-screen flex items-center justify-center">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <Card className="p-8">
-          <CardContent className="space-y-6">
-            {/* Animated Construction Icons */}
-            <div className="relative flex justify-center items-center space-x-4 mb-8">
-              <Construction className="h-16 w-16 text-orange-500 animate-bounce" />
-              <Wrench className="h-12 w-12 text-gray-600 animate-pulse" />
-              <HardHat className="h-14 w-14 text-yellow-600 animate-bounce delay-200" />
-            </div>
+    <div className="bg-background py-12">
+      <div className="container mx-auto px-4 lg:px-6 space-y-8">
+        <div className="text-center space-y-3">
+          <p className="text-xs uppercase tracking-[0.4em] text-primary font-semibold">
+            Department gallery
+          </p>
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+            {department?.name || "Department gallery"}
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+            {department?.shortName
+              ? `A curated album of ${department.shortName} labs, events, and research moments.`
+              : "Photos and visuals from departments across the campus community."}
+          </p>
+        </div>
 
-            {/* Title */}
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-              Under Construction
-            </h1>
+        {galleryError && (
+          <p className="text-sm text-red-600 text-center">{galleryError}</p>
+        )}
 
-            {/* Subtitle */}
-            <p className="text-lg md:text-xl text-gray-600 mb-6">
-              Our gallery is being built with amazing new features!
-            </p>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {galleryItems.map((item) => (
+            <article key={item.uuid} className="space-y-3">
+              <div className="overflow-hidden rounded-2xl bg-muted">
+                <img
+                  src={item.image}
+                  alt={
+                    item.caption ||
+                    department?.shortName ||
+                    "Department gallery image"
+                  }
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-gray-900 line-clamp-2">
+                  {item.caption || department?.shortName || "Gallery image"}
+                </p>
+                {item.createdAt && (
+                  <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                    {formatGalleryDate(item.createdAt)}
+                  </p>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
 
-            {/* Progress Bar Animation */}
-            <div className="w-full bg-gray-200 rounded-full h-3 mb-6">
-              <div
-                className="bg-orange-500 h-3 rounded-full animate-pulse"
-                style={{ width: "65%" }}
-              ></div>
-            </div>
-
-            {/* Description */}
-            <p className="text-gray-500 max-w-md mx-auto">
-              We're working hard to bring you an incredible gallery experience.
-              Check back soon to explore our facilities, events, and campus
-              life!
-            </p>
-
-            {/* Coming Soon Badge */}
-            <div className="inline-flex items-center px-4 py-2 bg-orange-100 text-orange-800 rounded-full text-sm font-medium animate-pulse">
-              <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-orange-400 opacity-75 mr-2"></span>
-              <span className="relative">Coming Soon</span>
-            </div>
-          </CardContent>
-        </Card>
+        {galleryItems.length === 0 && !galleryError && (
+          <p className="text-center text-sm text-muted-foreground">
+            Gallery is being populated. Check back after the next event for fresh pictures.
+          </p>
+        )}
       </div>
     </div>
   );
