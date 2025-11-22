@@ -6,8 +6,7 @@ const env: Record<string, string | undefined> =
 export const USE_PROXY =
   (env.NEXT_PUBLIC_USE_PROXY || "").toLowerCase() === "true";
 
-export const API_BASE =
-  env.NEXT_PUBLIC_API_BASE || "https://api-staging.tcioe.edu.np";
+export const API_BASE = env.NEXT_PUBLIC_API_BASE || "https://cdn.tcioe.edu.np";
 export const API_PUBLIC_PREFIX =
   env.NEXT_PUBLIC_API_PUBLIC_PREFIX || "/api/v1/public/department-mod";
 export const API_NOTICE_PUBLIC_PREFIX =

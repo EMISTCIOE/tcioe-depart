@@ -1,4 +1,4 @@
-import { DEPARTMENT_CODE, getPublicApiUrl } from "@/lib/env";
+import { DEPARTMENT_CODE, getPublicApiUrl, API_BASE } from "@/lib/env";
 import { departmentSlugFromCode } from "@/lib/department";
 import { getDepartment } from "@/lib/data/publicDepartment";
 
@@ -24,7 +24,14 @@ const formatGalleryDate = (value?: string | null) => {
 
 export default async function GalleryPage() {
   const slug = departmentSlugFromCode(DEPARTMENT_CODE);
-  let department;
+  interface Department {
+    uuid?: string | null;
+    name?: string | null;
+    shortName?: string | null;
+    [key: string]: any;
+  }
+
+  let department: Department | null = null;
   try {
     if (slug) {
       department = await getDepartment(slug);
@@ -43,26 +50,55 @@ export default async function GalleryPage() {
         source_type: "department_gallery",
         source_identifier: department.uuid,
       });
-      const response = await fetch(
-        `${getPublicApiUrl("/api/v1/public/website-mod/global-gallery")}?${params.toString()}`,
-        {
-          headers: {
-            Accept: "application/json",
-          },
-          next: { revalidate: 120 },
-        }
-      );
+      const apiBase =
+        process.env.NEXT_PUBLIC_API_BASE || "https://cdn.tcioe.edu.np";
+      const url = new URL("/api/v1/public/website-mod/global-gallery", apiBase);
+      url.search = params.toString();
+      const response = await fetch(url, {
+        headers: {
+          Accept: "application/json",
+        },
+        next: { revalidate: 120 },
+      });
       if (!response.ok) {
         galleryError = `Gallery service returned ${response.status}`;
       } else {
         const data = await response.json();
         const results = Array.isArray(data?.results) ? data.results : [];
-        galleryItems = results.map((item: any) => ({
-          uuid: item.uuid,
-          image: item.image,
-          caption: item.caption,
-          createdAt: item.createdAt,
-        }));
+        galleryItems = results.map((item: any) => {
+          // Normalize image URL:
+          // - If absolute and points to localhost, replace origin with API_BASE
+          // - If absolute and not localhost, keep as-is
+          // - If relative (starts with / or no protocol), prefix with API_BASE via getPublicApiUrl
+          let image = item.image || "";
+          try {
+            const parsed = new URL(image);
+            // absolute URL
+            if (
+              parsed.hostname === "localhost" ||
+              parsed.hostname === "127.0.0.1"
+            ) {
+              // use only the pathname/search/hash and build with API_BASE
+              image = getPublicApiUrl(
+                parsed.pathname + parsed.search + parsed.hash
+              );
+            } else {
+              image = parsed.toString();
+            }
+          } catch (e) {
+            // image was not an absolute URL — treat as path
+            image = getPublicApiUrl(
+              image.startsWith("/") ? image : `/${image}`
+            );
+          }
+
+          return {
+            uuid: item.uuid,
+            image,
+            caption: item.caption,
+            createdAt: item.createdAt,
+          };
+        });
       }
     } catch (error) {
       galleryError = "Failed to load gallery images.";
@@ -121,7 +157,8 @@ export default async function GalleryPage() {
 
         {galleryItems.length === 0 && !galleryError && (
           <p className="text-center text-sm text-muted-foreground">
-            Gallery is being populated. Check back after the next event for fresh pictures.
+            Gallery is being populated. Check back after the next event for
+            fresh pictures.
           </p>
         )}
       </div>

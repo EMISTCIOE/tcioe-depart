@@ -34,20 +34,44 @@ export default function ContactPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Contact Information */}
           <div className="lg:col-span-1 space-y-6">
-            <Card>
+            <Card className="shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <MapPin className="h-5 w-5 text-secondary mr-2" />
                   Visit Us
                 </CardTitle>
+                <CardDescription className="text-sm">
+                  Thapathali Campus, Institute of Engineering
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-2 text-muted-foreground">
-                  <p>Department of Applied Science</p>
+              <CardContent className="space-y-4">
+                <div className="space-y-1 text-muted-foreground">
+                  <p className="font-medium">Department of Applied Science</p>
                   <p>Tribhuvan University</p>
-                  <p>Institute of Engineering</p>
-                  <p>Thapathali Campus</p>
-                  <p>Kathmandu, Nepal</p>
+                </div>
+
+                <div className="border-t pt-4">
+                  <ul className="space-y-3 text-sm text-muted-foreground">
+                    <li className="flex items-center gap-3">
+                      <Phone className="h-4 w-4 text-secondary" />
+                      <a href="tel:+977-1-1234567" className="hover:underline">
+                        +977-1-1234567
+                      </a>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <Mail className="h-4 w-4 text-secondary" />
+                      <a
+                        href="mailto:info@example.com"
+                        className="hover:underline"
+                      >
+                        info@tcioe.edu.np
+                      </a>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <Clock className="h-4 w-4 text-secondary" />
+                      <span>Mon - Fri: 9:00 AM - 5:00 PM</span>
+                    </li>
+                  </ul>
                 </div>
               </CardContent>
             </Card>
@@ -55,7 +79,7 @@ export default function ContactPage() {
 
           {/* Contact Form */}
           <div className="lg:col-span-2">
-            <Card>
+            <Card className="shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <MessageSquare className="h-5 w-5 text-secondary mr-2" />
@@ -66,98 +90,107 @@ export default function ContactPage() {
                   possible.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-8">
                 <form className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name *</Label>
+                    <div className="space-y-1">
+                      <Label htmlFor="firstName" className="text-sm">
+                        First Name *
+                      </Label>
                       <Input
                         id="firstName"
                         placeholder="Enter your first name"
                         required
+                        className="bg-white"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name *</Label>
+                    <div className="space-y-1">
+                      <Label htmlFor="lastName" className="text-sm">
+                        Last Name *
+                      </Label>
                       <Input
                         id="lastName"
                         placeholder="Enter your last name"
                         required
+                        className="bg-white"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email Address *</Label>
+                    <div className="space-y-1">
+                      <Label htmlFor="email" className="text-sm">
+                        Email Address *
+                      </Label>
                       <Input
                         id="email"
                         type="email"
                         placeholder="Enter your email"
                         required
+                        className="bg-white"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone Number</Label>
+                    <div className="space-y-1">
+                      <Label htmlFor="phone" className="text-sm">
+                        Phone Number
+                      </Label>
                       <Input
                         id="phone"
                         type="tel"
                         placeholder="Enter your phone number"
+                        className="bg-white"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="category">Inquiry Category *</Label>
+                  <div className="space-y-1">
+                    <Label htmlFor="category" className="text-sm">
+                      Inquiry Category *
+                    </Label>
                     <Select required>
                       <SelectTrigger>
                         <SelectValue placeholder="Select inquiry type" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="admissions">Admissions</SelectItem>
-                        <SelectItem value="programs">
-                          Academic Programs
-                        </SelectItem>
-                        <SelectItem value="research">
-                          Research Opportunities
-                        </SelectItem>
-                        <SelectItem value="faculty">
-                          Faculty Information
-                        </SelectItem>
-                        <SelectItem value="facilities">
-                          Facilities & Resources
-                        </SelectItem>
-                        <SelectItem value="general">
-                          General Information
-                        </SelectItem>
+                        <SelectItem value="programs">Academic Programs</SelectItem>
+                        <SelectItem value="research">Research Opportunities</SelectItem>
+                        <SelectItem value="faculty">Faculty Information</SelectItem>
+                        <SelectItem value="facilities">Facilities & Resources</SelectItem>
+                        <SelectItem value="general">General Information</SelectItem>
                         <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="subject">Subject *</Label>
+                  <div className="space-y-1">
+                    <Label htmlFor="subject" className="text-sm">
+                      Subject *
+                    </Label>
                     <Input
                       id="subject"
                       placeholder="Brief subject of your inquiry"
                       required
+                      className="bg-white"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="message">Message *</Label>
+                  <div className="space-y-1">
+                    <Label htmlFor="message" className="text-sm">
+                      Message *
+                    </Label>
                     <Textarea
                       id="message"
                       placeholder="Please provide details about your inquiry..."
-                      className="min-h-[120px]"
+                      className="min-h-[140px] bg-white"
                       required
                     />
                   </div>
 
-                  <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex flex-col sm:flex-row gap-4 items-start">
                     <Button
                       type="submit"
-                      className="bg-secondary hover:bg-secondary/90"
+                      className="bg-secondary hover:bg-secondary/90 flex items-center"
                     >
                       <Send className="h-4 w-4 mr-2" />
                       Send Message
