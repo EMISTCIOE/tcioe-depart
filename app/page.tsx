@@ -37,14 +37,25 @@ import {
 import { listNotices as listPublicNotices } from "@/lib/data/publicNotice";
 import { sanitizeHtml } from "@/lib/utils/sanitize";
 
-function eventStatus(start: string, end: string) {
+function eventStatus(start?: string | null, end?: string | null) {
   const now = new Date();
-  const s = new Date(start);
-  const e = new Date(end);
-  if (e.getTime() < now.getTime())
+  const s = new Date(start ?? "");
+  const e = new Date(end ?? "");
+
+  const sTime = s.getTime();
+  const eTime = e.getTime();
+
+  // If end date is a valid date and already passed
+  if (isFinite(eTime) && eTime < now.getTime()) {
     return { label: "Finished", variant: "outline" as const };
-  if (s.getTime() > now.getTime())
+  }
+
+  // If start date is a valid date and in the future
+  if (isFinite(sTime) && sTime > now.getTime()) {
     return { label: "Upcoming", variant: "secondary" as const };
+  }
+
+  // Default to running if dates are invalid or currently ongoing
   return { label: "Running", variant: "default" as const };
 }
 
@@ -65,9 +76,7 @@ function humanizeLabel(value?: string) {
   if (!value) return "";
   return value
     .split(/[_\s]+/)
-    .map(
-      (part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
-    )
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
     .join(" ");
 }
 
@@ -195,11 +204,14 @@ export default async function HomePage() {
       <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-background to-muted">
         <div className="absolute inset-0 hero-pattern"></div>
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20 blur-sm scale-110"
           style={{
-            backgroundImage: "url('/university-campus-building-academic.jpg')",
+            backgroundImage: `url(${
+              dept?.thumbnail || "/university-campus-building-academic.jpg"
+            })`,
           }}
-        ></div>
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/80 to-background backdrop-blur-[2px]" />
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-balance mb-6 text-foreground">
             {dept?.name || "Department"}
@@ -491,7 +503,8 @@ export default async function HomePage() {
               Featured research, projects, and journal pieces
             </h2>
             <p className="text-gray-600">
-              Fresh scholarship and student projects anchored to the department, all in one place.
+              Fresh scholarship and student projects anchored to the department,
+              all in one place.
             </p>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
@@ -509,7 +522,8 @@ export default async function HomePage() {
                   )}
                 </div>
                 <CardTitle className="text-xl font-semibold leading-snug">
-                  {researchSpotlight?.title || "Research updates will appear shortly"}
+                  {researchSpotlight?.title ||
+                    "Research updates will appear shortly"}
                 </CardTitle>
                 <CardDescription className="text-sm text-muted-foreground line-clamp-3">
                   {researchSpotlight
@@ -521,8 +535,11 @@ export default async function HomePage() {
                 {researchSpotlight ? (
                   <>
                     <p className="text-sm text-muted-foreground">
-                      {researchSpotlight.department?.name || "Department research"} ·{" "}
-                      {researchSpotlight.fundingAgency || "Sponsored initiative"}
+                      {researchSpotlight.department?.name ||
+                        "Department research"}{" "}
+                      ·{" "}
+                      {researchSpotlight.fundingAgency ||
+                        "Sponsored initiative"}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {formatShortDate(researchSpotlight.startDate)} –{" "}
@@ -533,7 +550,8 @@ export default async function HomePage() {
                   </>
                 ) : (
                   <p className="text-sm text-muted-foreground">
-                    We showcase a flagship research article as soon as it is ready.
+                    We showcase a flagship research article as soon as it is
+                    ready.
                   </p>
                 )}
               </CardContent>
@@ -562,7 +580,8 @@ export default async function HomePage() {
                   )}
                 </div>
                 <CardTitle className="text-xl font-semibold leading-snug">
-                  {projectSpotlight?.title || "Featured projects land here soon"}
+                  {projectSpotlight?.title ||
+                    "Featured projects land here soon"}
                 </CardTitle>
                 <CardDescription className="text-sm text-muted-foreground line-clamp-3">
                   {projectSpotlight?.abstract ||
@@ -572,12 +591,13 @@ export default async function HomePage() {
               <CardContent className="space-y-2">
                 {projectSpotlight ? (
                   <p className="text-sm text-muted-foreground">
-                    {projectSpotlight.department?.name || "Department project"} ·{" "}
-                    {projectSpotlight.academicYear || "Academic update"}
+                    {projectSpotlight.department?.name || "Department project"}{" "}
+                    · {projectSpotlight.academicYear || "Academic update"}
                   </p>
                 ) : (
                   <p className="text-sm text-muted-foreground">
-                    Coming soon: a student or faculty showcase from the latest term.
+                    Coming soon: a student or faculty showcase from the latest
+                    term.
                   </p>
                 )}
               </CardContent>
@@ -648,13 +668,7 @@ export default async function HomePage() {
                   className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                   asChild
                 >
-                  <a
-                    href="https://tcioe.edu.np/journal"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Visit journal
-                  </a>
+                  <a href="/journal">Visit journal</a>
                 </Button>
               </CardFooter>
             </Card>

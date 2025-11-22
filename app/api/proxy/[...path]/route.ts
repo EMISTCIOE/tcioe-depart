@@ -12,7 +12,6 @@ export async function GET(
   const url = new URL(req.url);
   const qs = url.search ? url.search : "";
   const target = `${API_BASE.replace(/\/$/, "")}/${path}${qs}`;
-  console.log(`[api/proxy] GET ${target}`);
 
   const res = await fetch(target, {
     headers: { accept: "application/json" },
@@ -27,7 +26,6 @@ export async function GET(
   try {
     const truncated =
       body.length > 2000 ? `${body.slice(0, 2000)}... (truncated)` : body;
-    console.log(`[api/proxy] response body: ${truncated}`);
   } catch (e) {
     /* ignore */
   }

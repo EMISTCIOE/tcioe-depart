@@ -20,6 +20,9 @@ export const API_PROJECT_PUBLIC_PREFIX =
   env.NEXT_PUBLIC_API_PROJECT_PUBLIC_PREFIX || "/api/v1/public/project-mod";
 export const API_JOURNAL_PUBLIC_PREFIX =
   env.NEXT_PUBLIC_API_JOURNAL_PUBLIC_PREFIX || "/api/v1/public/journal-mod";
+export const SCHEDULE_API_BASE =
+  env.NEXT_PUBLIC_SCHEDULE_API_BASE ||
+  "https://schedule-backend.tcioe.edu.np/api";
 
 export const DEPARTMENT_CODE = (
   env.NEXT_PUBLIC_DEPARTMENT || "doece"
@@ -37,7 +40,6 @@ export function getPublicApiUrl(path: string) {
   const url = `${base}${suffix}`;
   if (DEBUG_API) {
     try {
-      console.log(`[getPublicApiUrl] ${path} -> ${url}`);
     } catch (e) {
       /* ignore */
     }

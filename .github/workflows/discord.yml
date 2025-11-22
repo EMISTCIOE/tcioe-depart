@@ -58,13 +58,12 @@ jobs:
               }
               
               const result = await response.text();
-              console.log('Google Apps Script response:', result);
+             
               
-              // Log success
-              console.log(`✅ Successfully sent ${context.eventName} notification to Discord via Google Apps Script`);
+             
               
             } catch (error) {
-              console.error('❌ Failed to send notification:', error);
+
               console.error('Error details:', error.message);
               throw error;
             }

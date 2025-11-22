@@ -13,7 +13,6 @@ function buildQuery(params: URLSearchParams) {
 }
 
 async function proxy(url: string) {
-  console.log(`[department/plans proxy] GET ${url}`);
   const res = await fetch(url, {
     headers: { accept: "application/json" },
     cache: "no-store",
@@ -28,7 +27,6 @@ async function proxy(url: string) {
       .catch(() => "");
     const truncated =
       text.length > 2000 ? `${text.slice(0, 2000)}... (truncated)` : text;
-    console.log(`[department/plans proxy] response body: ${truncated}`);
   } catch (e) {
     /* ignore */
   }
@@ -49,7 +47,7 @@ export async function GET(
     /\/$/,
     ""
   )}${API_PUBLIC_PREFIX}/departments/${slug}/plans${qs}`;
-  console.log(`[department/plans] trying public endpoint: ${publicUrl}`);
+
   let res = await proxy(publicUrl);
   if (res && res.ok) {
     const body = await res.text();
@@ -66,7 +64,7 @@ export async function GET(
     /\/$/,
     ""
   )}${API_PUBLIC_PREFIX}/departments/${slug}`;
-  console.log(`[department/plans] fetching dept info: ${deptUrl}`);
+
   const deptRes = await fetch(deptUrl, {
     headers: { accept: "application/json" },
     cache: "no-store",
@@ -84,7 +82,7 @@ export async function GET(
     /\/$/,
     ""
   )}/api/v1/cms/department-mod/department-plans-policies${qs}`;
-  console.log(`[department/plans] fetching cms list: ${cmsUrl}`);
+  c;
   const cmsRes = await fetch(cmsUrl, {
     headers: { accept: "application/json" },
     cache: "no-store",

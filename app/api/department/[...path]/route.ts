@@ -38,7 +38,6 @@ export async function GET(
   const target = buildTarget(pathParts, req.nextUrl.search);
 
   try {
-    console.log(`[department proxy] GET ${target}`);
     const res = await fetch(target, {
       headers: { accept: "application/json" },
       cache: "no-store",
@@ -46,14 +45,10 @@ export async function GET(
     const body = await res.text();
     const ct = res.headers.get("content-type") || "application/json";
 
-    console.log(
-      `[department proxy] ${target} -> ${res.status} ${res.statusText} (${ct})`
-    );
     // Log a truncated response body for debugging (avoid extremely large logs)
     try {
       const truncated =
         body.length > 2000 ? `${body.slice(0, 2000)}... (truncated)` : body;
-      console.log(`[department proxy] response body: ${truncated}`);
     } catch (e) {
       /* ignore logging errors */
     }

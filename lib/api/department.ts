@@ -37,18 +37,15 @@ function absolutize(path: string) {
 async function getJson<T>(path: string, params?: QueryParams): Promise<T> {
   const url = absolutize(`${path}${buildQuery(params)}`);
   try {
-    console.log(`[getJson] GET ${url}`);
     const res = await fetch(url, {
       next: { revalidate: 60 },
       headers: { accept: "application/json" },
     });
-    console.log(`[getJson] ${url} -> ${res.status} ${res.statusText}`);
     try {
       const clone = res.clone();
       const text = await clone.text().catch(() => "");
       const truncated =
         text.length > 2000 ? `${text.slice(0, 2000)}... (truncated)` : text;
-      console.log(`[getJson] response body: ${truncated}`);
     } catch (e) {
       /* ignore logging errors */
     }

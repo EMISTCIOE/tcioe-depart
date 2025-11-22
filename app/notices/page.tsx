@@ -21,7 +21,6 @@ export default function NoticesPage() {
   const { data, loading, error } = useDepartmentNotices({
     ordering: "-publishedAt",
     limit: 20,
-    departmentUuid: dept?.uuid,
   });
 
   const notices = data?.results || [];
@@ -50,7 +49,7 @@ export default function NoticesPage() {
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto text-pretty">
             Stay informed with the latest announcements, important notices, and
-            updates from the Department of Applied Science.
+            updates from {dept?.name || "the department"}.
           </p>
         </div>
 

@@ -8,19 +8,18 @@ import { Menu, X, ChevronDown } from "lucide-react";
 import AnnouncementsTicker from "@/components/announcements-ticker";
 
 const navigationItems = [
-  { name: "Home", href: "/" },
-  { name: "About", href: "/about" },
-  { name: "Programs", href: "/programs" },
-
-  { name: "Faculty & Staff", href: "/faculty" },
-  { name: "Events", href: "/events" },
-  { name: "Notices", href: "/notices" },
-  { name: "Alumni", href: "/alumni" },
-  { name: "Gallery", href: "/gallery" },
-  { name: "Downloads", href: "/downloads" },
-  { name: "Plans", href: "/plans" },
-  { name: "Contact Us", href: "/contact" },
-  { name: "Research & Projects", href: "/research" },
+  { name: "Home", href: "/", group: "main" },
+  { name: "About", href: "/about", group: "main" },
+  { name: "Programs", href: "/programs", group: "main" },
+  { name: "Faculty & Staff", href: "/faculty", group: "main" },
+  { name: "Projects", href: "/projects", group: "main" },
+  { name: "Research", href: "/research", group: "main" },
+  { name: "Journal", href: "/journal", group: "main" },
+  { name: "Events", href: "/events", group: "main" },
+  { name: "Notices", href: "/notices", group: "main" },
+  { name: "Downloads", href: "/downloads", group: "main" },
+  { name: "Gallery", href: "/gallery", group: "more" },
+  { name: "Contact Us", href: "/contact", group: "more" },
 ];
 
 export function Navigation() {
@@ -37,7 +36,7 @@ export function Navigation() {
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 relative">
                   <img
-                    src="/logo.jpg"
+                    src="/logo.png"
                     alt="Tribhuvan University Logo"
                     className="w-full h-full object-contain"
                   />
@@ -80,31 +79,35 @@ export function Navigation() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center">
               {/* Desktop Navigation */}
-              <div className="hidden lg:flex items-center space-x-8">
-                {navigationItems.slice(0, 10).map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className="px-3 py-4 text-sm font-medium text-gray-700 hover:text-primary hover:border-b-2 hover:border-primary transition-all duration-200"
-                  >
-                    {item.name}
-                  </Link>
-                ))}
+              <div className="hidden lg:flex items-center space-x-6">
+                {navigationItems
+                  .filter((item) => item.group === "main")
+                  .map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className="px-3 py-4 text-sm font-medium text-gray-700 hover:text-primary hover:border-b-2 hover:border-primary transition-all duration-200"
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
                 <div className="relative group">
                   <button className="flex items-center px-3 py-4 text-sm font-medium text-gray-700 hover:text-primary transition-colors">
                     More
                     <ChevronDown className="ml-1 h-4 w-4" />
                   </button>
                   <div className="absolute left-0 mt-0 w-48 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                    {navigationItems.slice(10).map((item) => (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors"
-                      >
-                        {item.name}
-                      </Link>
-                    ))}
+                    {navigationItems
+                      .filter((item) => item.group === "more")
+                      .map((item) => (
+                        <Link
+                          key={item.name}
+                          href={item.href}
+                          className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors"
+                        >
+                          {item.name}
+                        </Link>
+                      ))}
                   </div>
                 </div>
               </div>

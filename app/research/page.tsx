@@ -6,14 +6,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, BookOpen, Layers } from "lucide-react";
+import { Calendar, BookOpen } from "lucide-react";
 import { departmentSlugFromCode } from "@/lib/department";
 import { DEPARTMENT_CODE } from "@/lib/env";
 import { getDepartment } from "@/lib/data/publicDepartment";
 import { listResearchByDepartment } from "@/lib/data/publicResearch";
-import { listProjectsByDepartment } from "@/lib/data/publicProject";
 import type { Research } from "@/lib/types/research";
-import type { Project } from "@/lib/types/project";
 
 const formatDate = (value?: string | null) => {
   if (!value) return "";
@@ -108,54 +106,6 @@ function ResearchCard({ item }: { item: Research }) {
   );
 }
 
-function ProjectCard({ item }: { item: Project }) {
-  return (
-    <Card className="h-full shadow-sm border-border/70">
-      <div className="aspect-video w-full bg-muted overflow-hidden">
-        {item.thumbnail && (
-          <img
-            src={item.thumbnail}
-            alt={item.title}
-            className="h-full w-full object-cover"
-          />
-        )}
-      </div>
-      <CardHeader className="space-y-3">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Badge variant="secondary">{titleize(item.projectType)}</Badge>
-          <Badge variant="outline">{titleize(item.status)}</Badge>
-          {item.academicYear && (
-            <span className="inline-flex items-center gap-1">
-              <Layers className="h-4 w-4" />
-              {item.academicYear}
-            </span>
-          )}
-        </div>
-        <div className="space-y-1">
-          <CardTitle className="text-xl line-clamp-2">{item.title}</CardTitle>
-          <CardDescription className="line-clamp-3">{item.abstract}</CardDescription>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {item.tags.map((tag) => (
-            <span
-              key={tag.id}
-              className="text-xs px-2 py-1 rounded-full bg-muted"
-              style={tag.color ? { border: `1px solid ${tag.color}`, color: tag.color } : {}}
-            >
-              {tag.name}
-            </span>
-          ))}
-        </div>
-        <div className="text-xs text-muted-foreground">
-          <span className="font-semibold text-foreground">Supervisor: </span>
-          {item.supervisorName || "N/A"}
-          {item.membersCount ? ` • ${item.membersCount} members` : ""}
-        </div>
-      </CardHeader>
-    </Card>
-  );
-}
-
 export default async function ResearchPage() {
   const slug = departmentSlugFromCode(DEPARTMENT_CODE);
 
@@ -170,9 +120,7 @@ export default async function ResearchPage() {
   }
 
   let research: Research[] = [];
-  let projects: Project[] = [];
   let researchError: string | null = null;
-  let projectsError: string | null = null;
 
   if (slug) {
     try {
@@ -186,19 +134,8 @@ export default async function ResearchPage() {
           : "Unable to load research items right now.";
     }
 
-    try {
-      projects = await listProjectsByDepartment(slug, {
-        ordering: "-created_at",
-      });
-    } catch (error) {
-      projectsError =
-        error instanceof Error
-          ? error.message
-          : "Unable to load projects right now.";
-    }
   } else {
     researchError = "Department code is not configured.";
-    projectsError = "Department code is not configured.";
   }
 
   return (
@@ -247,35 +184,6 @@ export default async function ResearchPage() {
           )}
         </section>
 
-        <section className="space-y-6">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-              <Layers className="h-5 w-5" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-semibold">Projects</h2>
-              <p className="text-sm text-muted-foreground">
-                Student and faculty projects filtered for this department.
-              </p>
-            </div>
-          </div>
-
-          {projectsError && (
-            <p className="text-sm text-red-600">{projectsError}</p>
-          )}
-
-          {projects.length === 0 && !projectsError ? (
-            <p className="text-sm text-muted-foreground">
-              Projects will appear here once they are published for this department.
-            </p>
-          ) : (
-            <div className="grid gap-6 md:grid-cols-2">
-              {projects.map((item) => (
-                <ProjectCard key={item.id} item={item} />
-              ))}
-            </div>
-          )}
-        </section>
       </div>
     </div>
   );

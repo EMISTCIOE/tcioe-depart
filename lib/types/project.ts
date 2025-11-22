@@ -19,6 +19,10 @@ export type Project = {
   supervisorName?: string | null;
   academicYear?: string | null;
   thumbnail?: string | null;
+  demoUrl?: string | null;
+  githubUrl?: string | null;
+  description?: string | null;
+  slug?: string | null;
   isFeatured: boolean;
   isPublished: boolean;
   viewsCount: number;

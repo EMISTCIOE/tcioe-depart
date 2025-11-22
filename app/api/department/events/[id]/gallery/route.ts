@@ -23,16 +23,14 @@ export async function GET(
     /\/$/,
     ""
   )}${API_PUBLIC_PREFIX}/departments/events/${id}/gallery${qs}`;
-  console.log(`[department/events/gallery proxy] GET ${target}`);
+
   const res = await fetch(target, {
     headers: { accept: "application/json" },
     cache: "no-store",
   });
   const body = await res.text();
   const ct = res.headers.get("content-type") || "application/json";
-  console.log(
-    `[department/events/gallery proxy] ${target} -> ${res.status} ${res.statusText} (${ct})`
-  );
+
   try {
     const truncated =
       body.length > 2000 ? `${body.slice(0, 2000)}... (truncated)` : body;

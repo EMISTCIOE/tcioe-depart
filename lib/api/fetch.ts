@@ -33,7 +33,6 @@ export async function apiGet<T>(
       fetchOptions.signal = controller.signal;
 
       try {
-        console.log(`[apiGet] (server) GET ${url}`);
         const res = await fetch(url, fetchOptions);
         clearTimeout(timeoutId);
 
@@ -46,7 +45,6 @@ export async function apiGet<T>(
           console.log(
             `[apiGet] (server) ${url} -> ${res.status} ${res.statusText}`
           );
-          console.log(`[apiGet] (server) response body: ${truncated}`);
         } catch (e) {
           /* ignore logging failures */
         }
@@ -64,7 +62,7 @@ export async function apiGet<T>(
       }
     } else {
       // Client-side: normal fetch
-      console.log(`[apiGet] (client) GET ${url}`);
+
       const res = await fetch(url, fetchOptions);
 
       // Clone and log a truncated response body for debugging in the browser
@@ -76,7 +74,6 @@ export async function apiGet<T>(
         console.log(
           `[apiGet] (client) ${url} -> ${res.status} ${res.statusText}`
         );
-        console.log(`[apiGet] (client) response body: ${truncated}`);
       } catch (e) {
         /* ignore logging failures */
       }

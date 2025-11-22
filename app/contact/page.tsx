@@ -127,7 +127,6 @@ export default function ContactPage() {
                         <SelectItem value="facilities">
                           Facilities & Resources
                         </SelectItem>
-                        <SelectItem value="alumni">Alumni Services</SelectItem>
                         <SelectItem value="general">
                           General Information
                         </SelectItem>

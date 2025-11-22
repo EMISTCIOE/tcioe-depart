@@ -23,7 +23,7 @@ export async function GET(
     /\/$/,
     ""
   )}${API_PUBLIC_PREFIX}/departments/${slug}/programs${qs}`;
-  console.log(`[department/programs proxy] GET ${target}`);
+
   const res = await fetch(target, {
     headers: { accept: "application/json" },
     cache: "no-store",
@@ -36,7 +36,6 @@ export async function GET(
   try {
     const truncated =
       body.length > 2000 ? `${body.slice(0, 2000)}... (truncated)` : body;
-    console.log(`[department/programs proxy] response body: ${truncated}`);
   } catch (e) {
     /* ignore log errors */
   }

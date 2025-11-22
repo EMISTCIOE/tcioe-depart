@@ -158,10 +158,7 @@ export function Footer() {
             <div className="space-y-3 text-sm">
               <div className="flex items-center space-x-2">
                 <Mail className="h-4 w-4" />
-                <a
-                  href={`mailto:${email}`}
-                  className="hover:underline"
-                >
+                <a href={`mailto:${email}`} className="hover:underline">
                   {email}
                 </a>
               </div>
@@ -180,7 +177,7 @@ export function Footer() {
         <div className="border-t border-primary-foreground/20 mt-8 pt-8 flex flex-col sm:flex-row justify-between items-center text-sm">
           <p>&copy; 2025 Thapathali Campus — {dept?.name || "Department"}</p>
           <Link
-            href="https://tcioe-frontend.vercel.app/accessibility"
+            href="https://status.tcioe.edu.np"
             target="_blank"
             rel="noopener noreferrer"
             className="mt-2 sm:mt-0 flex items-center space-x-2 hover:underline transition-all"
