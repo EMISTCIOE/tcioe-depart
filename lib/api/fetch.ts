@@ -42,9 +42,6 @@ export async function apiGet<T>(
           const text = await clone.text().catch(() => "");
           const truncated =
             text.length > 2000 ? `${text.slice(0, 2000)}... (truncated)` : text;
-          console.log(
-            `[apiGet] (server) ${url} -> ${res.status} ${res.statusText}`
-          );
         } catch (e) {
           /* ignore logging failures */
         }

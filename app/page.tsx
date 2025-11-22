@@ -204,19 +204,20 @@ export default async function HomePage() {
       <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-background to-muted">
         <div className="absolute inset-0 hero-pattern"></div>
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20 blur-sm scale-110"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-100 scale-110 filter contrast-110 brightness-95"
           style={{
             backgroundImage: `url(${
               dept?.thumbnail || "/university-campus-building-academic.jpg"
             })`,
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/80 to-background backdrop-blur-[2px]" />
+        {/* Darkened overlay to ensure hero text is readable on all images. */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/30 to-black/50 backdrop-blur-[1px]" />
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-balance mb-6 text-foreground">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white drop-shadow-[0_6px_20px_rgba(0,0,0,0.65)]">
             {dept?.name || "Department"}
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground text-pretty mb-8 max-w-3xl mx-auto">
+          <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto drop-shadow-sm">
             Empowering the next generation of scientists and engineers through
             innovative education, cutting-edge research, and practical
             applications.
@@ -231,7 +232,7 @@ export default async function HomePage() {
             <Button
               size="lg"
               variant="outline"
-              className="border-primary text-primary hover:bg-primary hover:text-primary-foreground bg-transparent"
+              className="border-primary text-white hover:bg-primary/90 hover:text-primary-foreground bg-transparent"
             >
               <Link href="/research">Research & Projects</Link>
             </Button>
@@ -315,7 +316,7 @@ export default async function HomePage() {
                     "/university-campus-building-academic.jpg"
                   }
                   alt={dept?.name || "Department"}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover filter brightness-95 contrast-105"
                 />
               </div>
             </div>
@@ -647,7 +648,7 @@ export default async function HomePage() {
                     {journalSpotlight.authors?.length ? (
                       <p className="text-sm text-muted-foreground line-clamp-2">
                         {journalSpotlight.authors
-                          .map((author) =>
+                          .map((author: any) =>
                             [author.givenName, author.familyName]
                               .filter(Boolean)
                               .join(" ")
