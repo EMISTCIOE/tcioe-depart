@@ -54,11 +54,13 @@ export type DepartmentProgram = {
 export type DepartmentEvent = {
   uuid: string
   title: string
-  descriptionShort: string
-  eventType: string
-  eventStartDate: string
-  eventEndDate: string
-  thumbnail: string
+  description?: string | null
+  eventType?: string | null
+  eventStartDate?: string | null
+  eventEndDate?: string | null
+  thumbnail?: string | null
+  registrationLink?: string | null
+  location?: string | null
 }
 
 export type DepartmentStaff = {
@@ -78,4 +80,3 @@ export type EventGalleryItem = {
   image: string
   caption: string
 }
-

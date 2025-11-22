@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { Facebook, Mail, Phone, MapPin, X } from "lucide-react";
 import { useDepartmentContext } from "@/providers/department-provider";
-import { DEPARTMENT_CODE } from "@/lib/env";
 import { useDepartmentNotices } from "@/hooks/use-department";
 import { useEffect, useMemo, useState } from "react";
 import FeaturedNoticeModal from "@/components/featured-notice-modal";
@@ -24,6 +23,11 @@ export function Footer() {
   useEffect(() => {
     if (featured) setOpen(true);
   }, [featured]);
+
+  const email = dept?.email || "info@tcioe.edu.np";
+  const phone = dept?.phoneNo || "+977-1-4259955";
+  const address = "Thapathali Campus, Kathmandu";
+
   return (
     <footer
       className="text-primary-foreground"
@@ -155,19 +159,19 @@ export function Footer() {
               <div className="flex items-center space-x-2">
                 <Mail className="h-4 w-4" />
                 <a
-                  href={`mailto:${DEPARTMENT_CODE}@tcioe.edu.np`}
+                  href={`mailto:${email}`}
                   className="hover:underline"
                 >
-                  {`${DEPARTMENT_CODE}@tcioe.edu.np`}
+                  {email}
                 </a>
               </div>
               <div className="flex items-center space-x-2">
                 <Phone className="h-4 w-4" />
-                <span>+977-1-4259955</span>
+                <span>{phone}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <MapPin className="h-4 w-4" />
-                <span>Thapathali Campus, Kathmandu</span>
+                <span>{address}</span>
               </div>
             </div>
           </div>

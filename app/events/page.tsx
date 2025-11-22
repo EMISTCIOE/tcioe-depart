@@ -70,30 +70,34 @@ export default function EventsPage() {
   const { data, loading, error } = useDepartmentEvents({
     ordering: "-eventStartDate",
     limit: 20,
+    departmentUuid: dept?.uuid,
   });
 
   const events = data?.results || [];
   const tcase = (s?: string) =>
     s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : "";
-  const statusOf = (s: string, e: string) => {
+  const statusOf = (s?: string | null, e?: string | null) => {
     const now = new Date();
-    const sd = new Date(s);
-    const ed = new Date(e);
-    if (ed.getTime() < now.getTime())
+    const sd = s ? new Date(s) : null;
+    const ed = e ? new Date(e) : null;
+    if (ed && !Number.isNaN(ed.getTime()) && ed.getTime() < now.getTime())
       return { label: "Finished", variant: "outline" as const };
-    if (sd.getTime() > now.getTime())
+    if (sd && !Number.isNaN(sd.getTime()) && sd.getTime() > now.getTime())
       return { label: "Upcoming", variant: "secondary" as const };
     return { label: "Running", variant: "default" as const };
   };
 
-  const fmt = (d: string) => {
+  const fmt = (d?: string | null) => {
+    if (!d) return "TBD";
     try {
       const date = new Date(d);
-      return date.toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "2-digit",
-      });
+      return Number.isNaN(date.getTime())
+        ? d
+        : date.toLocaleDateString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "2-digit",
+          });
     } catch {
       return d;
     }
@@ -214,7 +218,7 @@ export default function EventsPage() {
                           {event.title}
                         </CardTitle>
                         <CardDescription className="line-clamp-2">
-                          {event.descriptionShort}
+                          {truncateText(event.description, 140)}
                         </CardDescription>
                       </div>
                       <div className="hidden sm:flex gap-2 shrink-0 opacity-80">

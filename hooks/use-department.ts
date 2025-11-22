@@ -56,24 +56,50 @@ export function useDepartment(opts?: { code?: string; slug?: string }) {
   return { ...s, slug, reload: load }
 }
 
-export function useDepartmentEvents(params?: { limit?: number; offset?: number; ordering?: string; search?: string; slug?: string }) {
+export function useDepartmentEvents(params?: {
+  limit?: number
+  offset?: number
+  ordering?: string
+  search?: string
+  departmentUuid?: string
+  slug?: string
+}) {
   const slug = params?.slug || useDepartmentSlug(undefined)
+  const [deptUuid, setDeptUuid] = useState<string | undefined>(params?.departmentUuid)
   const s = useAsyncState<Paginated<DepartmentEvent>>()
   const load = useCallback(async () => {
-    if (!slug) return
+    const department = params?.departmentUuid || deptUuid
+    if (!department) return
     s.setLoading(true)
     s.setError(null)
     try {
-      const res = await data.listDepartmentEvents(slug, params)
+      const res = await data.listDepartmentEvents(department, params)
       s.setData(res)
     } catch (e: any) {
       s.setError(e)
     } finally {
       s.setLoading(false)
     }
-  }, [slug, JSON.stringify(params || {})])
+  }, [JSON.stringify(params || {}), deptUuid])
   useEffect(() => void load(), [load])
-  return { ...s, slug, reload: load }
+  // load department uuid if not provided
+  useEffect(() => {
+    let ignore = false
+    async function loadUuid() {
+      if (params?.departmentUuid || !slug) return
+      try {
+        const d = await data.getDepartment(slug)
+        if (!ignore) setDeptUuid(d.uuid)
+      } catch {
+        // ignore
+      }
+    }
+    void loadUuid()
+    return () => {
+      ignore = true
+    }
+  }, [slug, params?.departmentUuid])
+  return { ...s, slug, reload: load, departmentUuid: deptUuid || params?.departmentUuid }
 }
 
 export function useDepartmentDownloads(params?: { limit?: number; offset?: number; slug?: string }) {
@@ -220,4 +246,3 @@ export function useDepartmentNotices(params?: {
   useEffect(() => void load(), [load])
   return { ...s, reload: load, departmentUuid: deptUuid || params?.departmentUuid }
 }
-

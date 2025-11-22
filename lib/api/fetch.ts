@@ -33,8 +33,23 @@ export async function apiGet<T>(
       fetchOptions.signal = controller.signal;
 
       try {
+        console.log(`[apiGet] (server) GET ${url}`);
         const res = await fetch(url, fetchOptions);
         clearTimeout(timeoutId);
+
+        // Log status and a truncated response body for debugging
+        try {
+          const clone = res.clone();
+          const text = await clone.text().catch(() => "");
+          const truncated =
+            text.length > 2000 ? `${text.slice(0, 2000)}... (truncated)` : text;
+          console.log(
+            `[apiGet] (server) ${url} -> ${res.status} ${res.statusText}`
+          );
+          console.log(`[apiGet] (server) response body: ${truncated}`);
+        } catch (e) {
+          /* ignore logging failures */
+        }
 
         if (!res.ok) {
           const text = await res.text().catch(() => "");
@@ -49,7 +64,23 @@ export async function apiGet<T>(
       }
     } else {
       // Client-side: normal fetch
+      console.log(`[apiGet] (client) GET ${url}`);
       const res = await fetch(url, fetchOptions);
+
+      // Clone and log a truncated response body for debugging in the browser
+      try {
+        const clone = res.clone();
+        const text = await clone.text().catch(() => "");
+        const truncated =
+          text.length > 2000 ? `${text.slice(0, 2000)}... (truncated)` : text;
+        console.log(
+          `[apiGet] (client) ${url} -> ${res.status} ${res.statusText}`
+        );
+        console.log(`[apiGet] (client) response body: ${truncated}`);
+      } catch (e) {
+        /* ignore logging failures */
+      }
+
       if (!res.ok) {
         const text = await res.text().catch(() => "");
         throw new Error(

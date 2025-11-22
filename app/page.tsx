@@ -21,7 +21,13 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
-import { DEPARTMENT_CODE, getPublicApiUrl } from "@/lib/env";
+import {
+  API_JOURNAL_PUBLIC_PREFIX,
+  API_PROJECT_PUBLIC_PREFIX,
+  API_RESEARCH_PUBLIC_PREFIX,
+  DEPARTMENT_CODE,
+  getPublicApiUrl,
+} from "@/lib/env";
 import { departmentSlugFromCode } from "@/lib/department";
 import {
   getDepartment,
@@ -100,12 +106,16 @@ export default async function HomePage() {
   }
 
   try {
-    [eventsRes, staffsRes] = slug
-      ? await Promise.all([
-          listDepartmentEvents(slug, { limit: 6, ordering: "-eventStartDate" }),
-          listDepartmentStaffs(slug, { limit: 20, ordering: "displayOrder" }),
-        ])
-      : [undefined, undefined];
+    [eventsRes, staffsRes] =
+      slug && dept?.uuid
+        ? await Promise.all([
+            listDepartmentEvents(dept.uuid, {
+              limit: 6,
+              ordering: "-eventStartDate",
+            }),
+            listDepartmentStaffs(slug, { limit: 20, ordering: "displayOrder" }),
+          ])
+        : [undefined, undefined];
   } catch (error) {
     console.warn("Failed to fetch events/staff:", error);
     eventsRes = undefined;
@@ -128,7 +138,7 @@ export default async function HomePage() {
   try {
     researchPayload =
       slug && slug.length > 0
-        ? await fetchPublicList("/api/v1/public/research-mod/research", {
+        ? await fetchPublicList(`${API_RESEARCH_PUBLIC_PREFIX}/research`, {
             department_slug: slug,
             limit: "3",
             ordering: "-date_published",
@@ -142,7 +152,7 @@ export default async function HomePage() {
   try {
     projectPayload =
       slug && slug.length > 0
-        ? await fetchPublicList("/api/v1/public/project-mod/projects", {
+        ? await fetchPublicList(`${API_PROJECT_PUBLIC_PREFIX}/projects`, {
             department_slug: slug,
             limit: "3",
             ordering: "-created_at",
@@ -156,7 +166,7 @@ export default async function HomePage() {
   try {
     journalPayload =
       slug && slug.length > 0
-        ? await fetchPublicList("/api/v1/public/journal-mod/articles", {
+        ? await fetchPublicList(`${API_JOURNAL_PUBLIC_PREFIX}/articles`, {
             department_slug: slug,
             limit: "2",
             ordering: "-date_published",

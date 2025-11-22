@@ -55,18 +55,17 @@ export function listDepartmentDownloads(
 }
 
 export function listDepartmentEvents(
-  slug: string,
+  departmentUuid: string,
   params?: {
     limit?: number;
     offset?: number;
     ordering?: string;
-    search?: string;
   }
 ): Promise<Paginated<DepartmentEvent>> {
   // Server: use absolute public API; Client: use local API route (CORS-safe)
   if (typeof window === "undefined")
-    return apiPublicListDepartmentEvents(slug, params);
-  return apiListDepartmentEvents(slug, params);
+    return apiPublicListDepartmentEvents(departmentUuid, params);
+  return apiListDepartmentEvents(departmentUuid, params);
 }
 
 export function listDepartmentPlans(
