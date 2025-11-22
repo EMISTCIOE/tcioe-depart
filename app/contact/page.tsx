@@ -153,11 +153,21 @@ export default function ContactPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="admissions">Admissions</SelectItem>
-                        <SelectItem value="programs">Academic Programs</SelectItem>
-                        <SelectItem value="research">Research Opportunities</SelectItem>
-                        <SelectItem value="faculty">Faculty Information</SelectItem>
-                        <SelectItem value="facilities">Facilities & Resources</SelectItem>
-                        <SelectItem value="general">General Information</SelectItem>
+                        <SelectItem value="programs">
+                          Academic Programs
+                        </SelectItem>
+                        <SelectItem value="research">
+                          Research Opportunities
+                        </SelectItem>
+                        <SelectItem value="faculty">
+                          Faculty Information
+                        </SelectItem>
+                        <SelectItem value="facilities">
+                          Facilities & Resources
+                        </SelectItem>
+                        <SelectItem value="general">
+                          General Information
+                        </SelectItem>
                         <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
